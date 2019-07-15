@@ -3,7 +3,7 @@ ZenPen = window.ZenPen || {};
 ZenPen.editor = (function() {
 
 	// Editor elements
-	var headerField, contentField, cleanSlate, lastType, currentNodeList, savedSelection;
+	var headerField, contentField, cleanSlate, lastType, currentNodeList, savedSelection, lastSelection, lastSelectionNode, lastSelectionRange;
 
 	// Editor Bubble elements
 	var textOptions, optionsBox, boldButton, italicButton, quoteButton, urlButton, urlInput;
@@ -290,7 +290,9 @@ ZenPen.editor = (function() {
 
 				// Since typing in the input box kills the highlighted text we need
 				// to save this selection, to add the url link if it is provided.
-				lastSelection = window.getSelection().getRangeAt(0);
+				lastSelection = window.getSelection();
+        			lastSelectionNode = lastSelection.focusNode;
+        			lastSelectionRange = lastSelection.getRangeAt(0);
 				lastType = false;
 
 				urlInput.focus();
@@ -318,7 +320,7 @@ ZenPen.editor = (function() {
 		applyURL( urlInput.value );
 		urlInput.value = '';
 
-		currentNodeList = findNodes( window.getSelection().focusNode );
+		currentNodeList = findNodes( lastSelectionNode );
 		updateBubbleStates();
 	}
 
@@ -342,8 +344,12 @@ ZenPen.editor = (function() {
 	}
 
 	function rehighlightLastSelection() {
+		var range = document.createRange();
+		    console.log(lastSelection, lastSelectionNode);
+		    range.selectNode(lastSelectionNode.parentNode);
+		    window.getSelection().removeAllRanges();
+		    window.getSelection().addRange(range);
 
-		window.getSelection().addRange( lastSelection );
 	}
 
 	function getWordCount() {
